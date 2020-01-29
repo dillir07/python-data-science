@@ -3,7 +3,7 @@ Implementation of Stack Data Structure.
 """
 
 
-class Item:
+class Item(object):
 
     """
     Reprsents an Item in Stack.
@@ -15,7 +15,7 @@ class Item:
         self._bottom = _bottom
 
 
-class Stack:
+class Stack(object):
 
     """
     A implementation of Stack data structure
@@ -46,7 +46,7 @@ class Stack:
         self._top = new_item
         self._size += 1
 
-        return new_item
+        return new_item._value
 
     def pop(self):
         """
@@ -60,7 +60,13 @@ class Stack:
             item = self._top
             self._top = item._bottom
             self._size -= 1
-            return item
+            return item._value
+
+    def peek(self):
+        """
+        Returns top item without making changes to the Stack.
+        """
+        return self._top._value
 
     def __str__(self):
         """
@@ -86,7 +92,5 @@ print("Str form of Stack is: ", str(s))
 s.pop()
 s.pop()
 s.pop()
-s.pop()
 print("length of Stack is: ", len(s))
 print("Str form of Stack is: ", str(s))
-# s.pop() -> throws Index error
