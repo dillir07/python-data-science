@@ -1,7 +1,8 @@
 """
 Reinforcement Learning
 reference: https://www.youtube.com/watch?v=psDlXfbe6ok
-Status:In progress (https://youtu.be/psDlXfbe6ok?list=PLd_Oyt6lAQ8SwsLuJ912NiCagUSEa1lDx&t=7340)
+Status:In progress
+https://youtu.be/psDlXfbe6ok?list=PLd_Oyt6lAQ8SwsLuJ912NiCagUSEa1lDx&t=7340
 TODO added QMatrix update
 """
 
@@ -36,16 +37,25 @@ class Agent:
 
 
 class QMatrix:
+    """
+    Q
+    -
+    - a -> alpha -> learning rate
+    - b -> gamma -> discount factor
+    """
+
     def __init__(self, nstates: int, nactions: int, learning_rate: float = 0.1, discount_factor: float = 1.0) -> None:
-        self.q = np.zeros((nstates * nactions), dtype=float)
-        self.lr = learning_rate
+        self.q = np.zeros((nstates * nactions, 4), dtype=float)
+        self.a = learning_rate
         self.g = discount_factor
 
-    def updateQMatrix(self) -> None:
+    def updateQMatrix(self, state: int, action: int, reward: float, new_state: int) -> None:
         """
         ref: https://wikimedia.org/api/rest_v1/media/math/render/svg/678cb558a9d59c33ef4810c9618baf34a9577686
         """
-        pass
+        q = self.q  # just to shortform the formula
+        q[state, action] = (1-self.a) * q[state, action] + \
+            self.a * (reward + self.g * np.max(q[state]))
 
 # %%
 
@@ -69,7 +79,6 @@ class Maze:
         # --------
         # => no of possible status & no of possible actions
         # => states: (rows * columns), actions:(up, down, right, left)
-        self.q = np.zeros((rows * columns, 4), dtype=float)
 
     def state_for_agent(self, agent: Agent) -> int:
         nr, nc = self.env.shape
@@ -143,10 +152,12 @@ def main() -> None:
         moves = m.compute_possible_moves()
         random.shuffle(moves)  # shuffles inplace
         action, action_index = moves[0]
-        previous_agent = m.state_for_agent(m.agent)
+        state = m.state_for_agent(m.agent)
         score = m.do_a_move(action)  # state changes here
         new_state = m.state_for_agent(m.agent)
         final_score += score
+        q.updateQMatrix(state=state, action=action_index,
+                        reward=score, new_state=new_state)
         print('Iteration {}, score:{}, final score:{}'.format(
             counter, score, final_score))
         print("State:{}, action:{}".format(
@@ -154,7 +165,7 @@ def main() -> None:
         m.visualize()
         print("-------------------")
     print('done, iterations:{} , score:{}'.format(counter, final_score))
-    print(m.q)
+    print(q.q)
 
 
 # %%
